@@ -4,6 +4,7 @@ import Header from './components/Header';
 import TabNavigation from './components/TabNavigation';
 import SignInOutSection from './components/SignInOutSection';
 import ActivityLogSection from './components/ActivityLogSection';
+import FamilySelectionModal from './components/FamilySelectionModal';
 
 
 function App() {
@@ -12,20 +13,22 @@ function App() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   
   const [clients, setClients] = useState([
-    { id: 1, name: 'John Smith', apartment: '101', site: 'Main Campus' },
-    { id: 2, name: 'Sarah Johnson', apartment: '205', site: 'Main Campus' },
-    { id: 3, name: 'Michael Brown', apartment: '302', site: 'Eastside Center' },
+    { id: 1, name: 'John Smith', apartment: '101', site: 'Main Campus', familyMembers: ['Jane Smith', 'Jimmy Smith'] },
+    { id: 2, name: 'Sarah Johnson', apartment: '205', site: 'Main Campus', familyMembers: [] },
+    { id: 3, name: 'Michael Brown', apartment: '302', site: 'Eastside Center', familyMembers: ['Emily Brown', 'Lucas Brown', 'Sophia Brown'] },
   ]);
   
   const [activities, setActivities] = useState([]);
   const [showAddClient, setShowAddClient] = useState(false);
-  const [newClient, setNewClient] = useState({ name: '', apartment: '' });
+  const [newClient, setNewClient] = useState({ name: '', apartment: '', familyMembers: [] });
   const [activeTab, setActiveTab] = useState('signin');
+  const [showFamilyModal, setShowFamilyModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
 
   const handleLogin = (site) => {
     setIsAuthenticated(true);
     setCurrentSite(site);
-    setNewClient({ name: '', apartment: '' });
+    setNewClient({ name: '', apartment: '', familyMembers: [] });
   };
 
   const handleLogout = () => {
@@ -45,6 +48,24 @@ function App() {
   };
 
   const handleSignIn = (client) => {
+    if (client.familyMembers && client.familyMembers.length > 0) {
+      setPendingAction({ client, action: 'IN' });
+      setShowFamilyModal(true);
+    } else {
+      confirmSignIn(client, []);
+    }
+  };
+
+  const handleSignOut = (client) => {
+    if (client.familyMembers && client.familyMembers.length > 0) {
+      setPendingAction({ client, action: 'OUT' });
+      setShowFamilyModal(true);
+    } else {
+      confirmSignOut(client, []);
+    }
+  };
+
+  const confirmSignIn = (client, selectedFamilyMembers) => {
     const activity = {
       id: Date.now(),
       clientId: client.id,
@@ -52,12 +73,16 @@ function App() {
       apartment: client.apartment,
       site: client.site,
       action: 'IN',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      familyMembers: selectedFamilyMembers,
+      totalPeople: selectedFamilyMembers.length + 1
     };
     setActivities([activity, ...activities]);
+    setShowFamilyModal(false);
+    setPendingAction(null);
   };
 
-  const handleSignOut = (client) => {
+  const confirmSignOut = (client, selectedFamilyMembers) => {
     const activity = {
       id: Date.now(),
       clientId: client.id,
@@ -65,21 +90,44 @@ function App() {
       apartment: client.apartment,
       site: client.site,
       action: 'OUT',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      familyMembers: selectedFamilyMembers,
+      totalPeople: selectedFamilyMembers.length + 1
     };
     setActivities([activity, ...activities]);
+    setShowFamilyModal(false);
+    setPendingAction(null);
+  };
+
+  const handleFamilyConfirm = (selectedMembers) => {
+    if (pendingAction) {
+      if (pendingAction.action === 'IN') {
+        confirmSignIn(pendingAction.client, selectedMembers);
+      } else {
+        confirmSignOut(pendingAction.client, selectedMembers);
+      }
+    }
+  };
+
+  const handleFamilyCancel = () => {
+    setShowFamilyModal(false);
+    setPendingAction(null);
   };
 
   const handleAddClient = () => {
     if (newClient.name && newClient.apartment) {
+      // Filter out empty family member names
+      const validFamilyMembers = (newClient.familyMembers || []).filter(member => member.trim() !== '');
+
       const client = {
         id: Date.now(),
         name: newClient.name,
         apartment: newClient.apartment,
-        site: currentSite
+        site: currentSite,
+        familyMembers: validFamilyMembers
       };
       setClients([...clients, client]);
-      setNewClient({ name: '', apartment: '' });
+      setNewClient({ name: '', apartment: '', familyMembers: [] });
       setShowAddClient(false);
     }
   };
@@ -128,6 +176,14 @@ function App() {
             isFullscreen={isFullscreen}
             onExitFullscreen={handleExitFullscreen}
           />
+          {showFamilyModal && pendingAction && (
+            <FamilySelectionModal
+              client={pendingAction.client}
+              action={pendingAction.action}
+              onConfirm={handleFamilyConfirm}
+              onCancel={handleFamilyCancel}
+            />
+          )}
         </div>
       </div>
     );
@@ -136,13 +192,13 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-6xl mx-auto">
-        <Header 
-          currentSite={currentSite} 
+        <Header
+          currentSite={currentSite}
           onLogout={handleLogout}
           isFullscreen={isFullscreen}
           onToggleFullscreen={handleToggleFullscreen}
         />
-        
+
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
@@ -169,6 +225,15 @@ function App() {
             currentSite={currentSite}
             todayActivities={todayActivities}
             formatTime={formatTime}
+          />
+        )}
+
+        {showFamilyModal && pendingAction && (
+          <FamilySelectionModal
+            client={pendingAction.client}
+            action={pendingAction.action}
+            onConfirm={handleFamilyConfirm}
+            onCancel={handleFamilyCancel}
           />
         )}
       </div>
