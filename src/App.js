@@ -5,6 +5,7 @@ import TabNavigation from './components/TabNavigation';
 import SignInOutSection from './components/SignInOutSection';
 import ActivityLogSection from './components/ActivityLogSection';
 import FamilySelectionModal from './components/FamilySelectionModal';
+import VisitorSignIn from './components/VisitorSignIn';
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('signin');
   const [showFamilyModal, setShowFamilyModal] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
+  const [visitors, setVisitors] = useState([]);
 
   const handleLogin = (site) => {
     setIsAuthenticated(true);
@@ -132,6 +134,48 @@ function App() {
     }
   };
 
+  const handleVisitorSignIn = (visitorData) => {
+    const visitor = {
+      id: Date.now(),
+      ...visitorData,
+      site: currentSite,
+      checkInTime: new Date().toISOString()
+    };
+    setVisitors([...visitors, visitor]);
+
+    const activity = {
+      id: Date.now() + 1,
+      visitorId: visitor.id,
+      clientName: visitor.name,
+      site: visitor.site,
+      action: 'IN',
+      timestamp: visitor.checkInTime,
+      isVisitor: true,
+      visitorType: visitor.type,
+      purpose: visitor.purpose,
+      visiting: visitor.visiting
+    };
+    setActivities([activity, ...activities]);
+  };
+
+  const handleVisitorSignOut = (visitor) => {
+    setVisitors(visitors.filter(v => v.id !== visitor.id));
+
+    const activity = {
+      id: Date.now(),
+      visitorId: visitor.id,
+      clientName: visitor.name,
+      site: visitor.site,
+      action: 'OUT',
+      timestamp: new Date().toISOString(),
+      isVisitor: true,
+      visitorType: visitor.type,
+      purpose: visitor.purpose,
+      visiting: visitor.visiting
+    };
+    setActivities([activity, ...activities]);
+  };
+
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -148,6 +192,7 @@ function App() {
   };
 
   const filteredClients = clients.filter(c => c.site === currentSite);
+  const activeVisitors = visitors.filter(v => v.site === currentSite);
   const todayActivities = activities.filter(a => {
     const activityDate = new Date(a.timestamp).toDateString();
     const today = new Date().toDateString();
@@ -162,20 +207,69 @@ function App() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
         <div className="max-w-7xl mx-auto">
-          <SignInOutSection
-            currentSite={currentSite}
-            filteredClients={filteredClients}
-            showAddClient={showAddClient}
-            setShowAddClient={setShowAddClient}
-            newClient={newClient}
-            setNewClient={setNewClient}
-            onAddClient={handleAddClient}
-            onSignIn={handleSignIn}
-            onSignOut={handleSignOut}
-            getClientStatus={getClientStatus}
-            isFullscreen={isFullscreen}
-            onExitFullscreen={handleExitFullscreen}
-          />
+          {/* Fullscreen Header with Tab Navigation */}
+          <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl font-bold text-gray-800">{currentSite}</h2>
+              </div>
+              <button
+                onClick={handleExitFullscreen}
+                className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition font-medium"
+              >
+                Exit Fullscreen
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setActiveTab('signin')}
+                className={`flex-1 py-3 px-4 rounded-lg font-medium transition ${
+                  activeTab === 'signin'
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Client Check In/Out
+              </button>
+              <button
+                onClick={() => setActiveTab('visitors')}
+                className={`flex-1 py-3 px-4 rounded-lg font-medium transition ${
+                  activeTab === 'visitors'
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Visitor Sign In/Out
+              </button>
+            </div>
+          </div>
+
+          {activeTab === 'signin' && (
+            <SignInOutSection
+              currentSite={currentSite}
+              filteredClients={filteredClients}
+              showAddClient={showAddClient}
+              setShowAddClient={setShowAddClient}
+              newClient={newClient}
+              setNewClient={setNewClient}
+              onAddClient={handleAddClient}
+              onSignIn={handleSignIn}
+              onSignOut={handleSignOut}
+              getClientStatus={getClientStatus}
+              isFullscreen={isFullscreen}
+              onExitFullscreen={handleExitFullscreen}
+            />
+          )}
+
+          {activeTab === 'visitors' && (
+            <VisitorSignIn
+              currentSite={currentSite}
+              onVisitorSignIn={handleVisitorSignIn}
+              onVisitorSignOut={handleVisitorSignOut}
+              activeVisitors={activeVisitors}
+            />
+          )}
+
           {showFamilyModal && pendingAction && (
             <FamilySelectionModal
               client={pendingAction.client}
@@ -217,6 +311,15 @@ function App() {
             getClientStatus={getClientStatus}
             isFullscreen={isFullscreen}
             onExitFullscreen={handleExitFullscreen}
+          />
+        )}
+
+        {activeTab === 'visitors' && (
+          <VisitorSignIn
+            currentSite={currentSite}
+            onVisitorSignIn={handleVisitorSignIn}
+            onVisitorSignOut={handleVisitorSignOut}
+            activeVisitors={activeVisitors}
           />
         )}
 
