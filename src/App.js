@@ -5,6 +5,7 @@ import TabNavigation from './components/TabNavigation';
 import SignInOutSection from './components/SignInOutSection';
 import ActivityLogSection from './components/ActivityLogSection';
 import FamilySelectionModal from './components/FamilySelectionModal';
+import VisitorSignIn from './components/VisitorSignIn';
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('signin');
   const [showFamilyModal, setShowFamilyModal] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
+  const [visitors, setVisitors] = useState([]);
 
   const handleLogin = (site) => {
     setIsAuthenticated(true);
@@ -132,6 +134,48 @@ function App() {
     }
   };
 
+  const handleVisitorSignIn = (visitorData) => {
+    const visitor = {
+      id: Date.now(),
+      ...visitorData,
+      site: currentSite,
+      checkInTime: new Date().toISOString()
+    };
+    setVisitors([...visitors, visitor]);
+
+    const activity = {
+      id: Date.now() + 1,
+      visitorId: visitor.id,
+      clientName: visitor.name,
+      site: visitor.site,
+      action: 'IN',
+      timestamp: visitor.checkInTime,
+      isVisitor: true,
+      visitorType: visitor.type,
+      purpose: visitor.purpose,
+      visiting: visitor.visiting
+    };
+    setActivities([activity, ...activities]);
+  };
+
+  const handleVisitorSignOut = (visitor) => {
+    setVisitors(visitors.filter(v => v.id !== visitor.id));
+
+    const activity = {
+      id: Date.now(),
+      visitorId: visitor.id,
+      clientName: visitor.name,
+      site: visitor.site,
+      action: 'OUT',
+      timestamp: new Date().toISOString(),
+      isVisitor: true,
+      visitorType: visitor.type,
+      purpose: visitor.purpose,
+      visiting: visitor.visiting
+    };
+    setActivities([activity, ...activities]);
+  };
+
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -148,6 +192,7 @@ function App() {
   };
 
   const filteredClients = clients.filter(c => c.site === currentSite);
+  const activeVisitors = visitors.filter(v => v.site === currentSite);
   const todayActivities = activities.filter(a => {
     const activityDate = new Date(a.timestamp).toDateString();
     const today = new Date().toDateString();
@@ -217,6 +262,15 @@ function App() {
             getClientStatus={getClientStatus}
             isFullscreen={isFullscreen}
             onExitFullscreen={handleExitFullscreen}
+          />
+        )}
+
+        {activeTab === 'visitors' && (
+          <VisitorSignIn
+            currentSite={currentSite}
+            onVisitorSignIn={handleVisitorSignIn}
+            onVisitorSignOut={handleVisitorSignOut}
+            activeVisitors={activeVisitors}
           />
         )}
 
