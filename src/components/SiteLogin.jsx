@@ -1,11 +1,24 @@
 import React, { useState } from 'react';
-import { Lock } from 'lucide-react';
+import { Lock, Users } from 'lucide-react';
 import { SITE_CONFIG } from '../config/siteConfig';
 
 const SiteLogin = ({ onLogin }) => {
   const [selectedSite, setSelectedSite] = useState('Main Campus');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+
+  // Try to load logo if it exists, otherwise use default icon
+  let logo = null;
+  try {
+    // Try PNG first, then SVG
+    try {
+      logo = require('../assets/voa-logo.png');
+    } catch (e) {
+      logo = require('../assets/voa-logo.svg');
+    }
+  } catch (e) {
+    // Logo not found, will use default icon
+  }
 
   const handleLogin = () => {
     if (SITE_CONFIG[selectedSite].password === password) {
@@ -26,11 +39,25 @@ const SiteLogin = ({ onLogin }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
-        <div className="flex items-center justify-center mb-6">
-          <Lock className="w-12 h-12 text-indigo-600 mr-3" />
-          <h1 className="text-3xl font-bold text-gray-800">Site Access</h1>
+        <div className="flex flex-col items-center justify-center mb-6">
+          <div className="flex items-center justify-center mb-4">
+            {logo ? (
+              <img
+                src={logo}
+                alt="Volunteers of America Logo"
+                className="w-20 h-20 object-contain"
+              />
+            ) : (
+              <Users className="w-20 h-20 text-indigo-600" />
+            )}
+          </div>
+          <h2 className="text-xl font-bold text-indigo-700 mb-2">Volunteers of America</h2>
+          <div className="flex items-center justify-center">
+            <Lock className="w-8 h-8 text-indigo-600 mr-2" />
+            <h1 className="text-2xl font-bold text-gray-800">Site Access</h1>
+          </div>
         </div>
-        
+
         <p className="text-gray-600 text-center mb-6">
           Select your program site and enter the access password
         </p>
