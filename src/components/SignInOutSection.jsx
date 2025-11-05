@@ -3,16 +3,18 @@ import { UserPlus, Users, Minimize } from 'lucide-react';
 import AddClientForm from './AddClientForm';
 import ClientCard from './ClientCard';
 
-const SignInOutSection = ({ 
+const SignInOutSection = ({
   currentSite,
-  filteredClients, 
-  showAddClient, 
+  filteredClients,
+  showAddClient,
   setShowAddClient,
   newClient,
   setNewClient,
   onAddClient,
   onSignIn,
   onSignOut,
+  onEdit,
+  onDelete,
   getClientStatus,
   isFullscreen,
   onExitFullscreen
@@ -58,6 +60,8 @@ const SignInOutSection = ({
             client={client}
             onSignIn={onSignIn}
             onSignOut={onSignOut}
+            onEdit={onEdit}
+            onDelete={onDelete}
             isSignedIn={getClientStatus(client.id)}
           />
         ))}
