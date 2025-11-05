@@ -1,148 +1,327 @@
-# Client Check-In System
+# Client Check-In Tracking System
 
-A modern, secure web application for managing client check-ins and check-outs across multiple program sites. Built with React and Tailwind CSS.
+A modern, full-featured web application for managing client and visitor check-ins across multiple program sites. Built with React, Node.js, Express, and SQLite for **Volunteers of America**.
 
-## Features
+![Volunteers of America](https://img.shields.io/badge/Volunteers%20of%20America-Client%20Management-4955a4)
+![Version](https://img.shields.io/badge/version-2.0.0-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
+## 🌟 Key Features
+
+### Core Functionality
 - 🔐 **Site-Based Authentication** - Password-protected access for different program sites
-- ✅ **Two-Step Verification** - Clients verify identity with apartment number before checking in/out
-- 📊 **Real-Time Status Tracking** - Visual indicators show who's in the building vs outside
-- 📝 **Activity Logging** - Track all check-in/check-out activity with timestamps
-- 👥 **Client Management** - Add and manage client profiles for each site
-- 🖥️ **Fullscreen Mode** - Dedicated kiosk mode for self-service check-in stations
-- 📱 **Responsive Design** - Works on desktop, tablet, and mobile devices
+- 🗄️ **Local SQL Database** - Persistent data storage with SQLite
+- 💳 **Card ID Support** - Optional card IDs for quick client lookup
+- 👨‍👩‍👧‍👦 **Family Checkout Tracking** - Track how many people and who checked in/out
+- 👥 **Visitor Management** - Complete sign-in system for guests, vendors, contractors, etc.
+- 📊 **Real-Time Status** - Visual indicators for who's in the building
+- 📝 **Activity Logging** - Comprehensive check-in/check-out history
+- 🖥️ **Fullscreen Kiosk Mode** - Dedicated self-service interface
+- 📱 **Responsive Design** - Works on desktop, tablet, and mobile
 
-## Table of Contents
+### Advanced Features
+- **Family Member Selection** - Choose which family members are checking in/out
+- **Visitor Types** - Guest, Vendor, Contractor, Outside Employee, Volunteer, Other
+- **Purpose Tracking** - Record why visitors are here and who they're visiting
+- **Persistent Storage** - All data saved to local SQLite database
+- **REST API** - Complete backend API for data management
+- **Multi-Site Support** - Separate data for each program site
+
+## 📋 Table of Contents
 
 - [Prerequisites](#prerequisites)
+- [Quick Start](#quick-start)
 - [Installation](#installation)
 - [Running the Application](#running-the-application)
+- [Database Setup](#database-setup)
+- [Features Deep Dive](#features-deep-dive)
 - [Project Structure](#project-structure)
-- [Dependencies](#dependencies)
 - [Configuration](#configuration)
-- [Usage](#usage)
+- [API Documentation](#api-documentation)
+- [Usage Guide](#usage-guide)
 - [Building for Production](#building-for-production)
 - [Troubleshooting](#troubleshooting)
+- [Security](#security)
 
-## Prerequisites
+## ✅ Prerequisites
 
-Before you begin, ensure you have the following installed:
+Before you begin, ensure you have:
 
-- **Node.js** (version 14.0 or higher)
-  - Download from [https://nodejs.org/](https://nodejs.org/)
-  - Verify installation: `node --version`
+- **Node.js** (version 14.0 or higher) - [Download](https://nodejs.org/)
 - **npm** (comes with Node.js)
-  - Verify installation: `npm --version`
+- Basic understanding of terminal/command line
 
-## Installation
+Verify installation:
+```bash
+node --version
+npm --version
+```
 
-1. **Clone or download the project:**
-   ```bash
-   # If using git
-   git clone <your-repository-url>
-   cd client-checkin-system
-   
-   # Or extract the downloaded ZIP file and navigate to the folder
-   cd client-checkin-system
-   ```
+## 🚀 Quick Start
 
-2. **Install all dependencies:**
-   ```bash
-   npm install
-   ```
+### 1. Install Dependencies
 
-   This will install all required packages listed in `package.json`.
+**Frontend:**
+```bash
+npm install
+```
 
-## Running the Application
+**Backend:**
+```bash
+cd server
+npm install
+cd ..
+```
 
-### Development Mode
+### 2. Start Backend Server
 
-Start the development server with hot-reload:
+```bash
+cd server
+npm start
+```
+
+You should see:
+```
+Server running on http://localhost:3001
+Database location: /path/to/server/checkin.db
+Database tables initialized successfully
+Sample client data inserted
+```
+
+### 3. Start Frontend (New Terminal)
 
 ```bash
 npm start
 ```
 
-The application will automatically open in your default browser at:
+App opens at http://localhost:3000
+
+### 4. Login
+
+**Default Sites & Passwords:**
+| Site | Password |
+|------|----------|
+| Main Campus | `main123` |
+| Eastside Center | `east456` |
+| Westside Hub | `west789` |
+| Downtown Facility | `down101` |
+
+## 📦 Installation
+
+### Detailed Setup
+
+1. **Clone or Download:**
+   ```bash
+   git clone <your-repository-url>
+   cd Client-Check-In-Tracking-System
+   ```
+
+2. **Install Frontend Dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Install Backend Dependencies:**
+   ```bash
+   cd server
+   npm install
+   cd ..
+   ```
+
+4. **Verify Installation:**
+   ```bash
+   # Check that all dependencies are installed
+   npm ls --depth=0
+   cd server && npm ls --depth=0
+   ```
+
+## 🏃 Running the Application
+
+### Development Mode
+
+**Terminal 1 - Backend:**
+```bash
+cd server
+npm start
+# Server runs on http://localhost:3001
 ```
-http://localhost:3000
+
+**Terminal 2 - Frontend:**
+```bash
+npm start
+# App opens on http://localhost:3000
 ```
 
-If it doesn't open automatically, manually navigate to `http://localhost:3000`
+### Production Mode
 
-### Stopping the Server
+1. Build frontend:
+   ```bash
+   npm run build
+   ```
 
-Press `Ctrl + C` in the terminal to stop the development server.
+2. Start backend:
+   ```bash
+   cd server
+   npm start
+   ```
 
-## Project Structure
+3. Serve frontend build (optional):
+   ```bash
+   npm install -g serve
+   serve -s build
+   ```
+
+## 🗄️ Database Setup
+
+The application uses **SQLite** for local data persistence.
+
+### Database Location
+- **File:** `server/checkin.db`
+- **Auto-created** on first server start
+- **Sample data** included for testing
+
+### Database Schema
+
+**Clients:**
+- ID, Name, Apartment, Site, **Card ID**, Family Members, Timestamps
+
+**Visitors:**
+- ID, Name, Type, Purpose, Visiting, Site, Check-in/out Times
+
+**Activities:**
+- Complete log of all check-ins/check-outs with family/visitor details
+
+### Sample Data
+
+3 pre-loaded clients:
+1. **John Smith** - Apt 101, Main Campus, Card: CARD001
+   - Family: Jane Smith, Jimmy Smith
+2. **Sarah Johnson** - Apt 205, Main Campus, Card: CARD002
+3. **Michael Brown** - Apt 302, Eastside Center, Card: CARD003
+   - Family: Emily Brown, Lucas Brown, Sophia Brown
+
+### Database Operations
+
+**Backup:**
+```bash
+cp server/checkin.db server/checkin-backup.db
+```
+
+**Reset:**
+```bash
+cd server
+rm checkin.db
+npm start  # Recreates with sample data
+```
+
+**View Data:**
+Use any SQLite viewer or:
+```bash
+sqlite3 server/checkin.db
+.tables
+SELECT * FROM clients;
+.quit
+```
+
+📖 **Full database documentation:** See `DATABASE_SETUP.md`
+
+## 🎯 Features Deep Dive
+
+### 1. Client Management
+- **Add Clients** with name, apartment, and optional card ID
+- **Family Members** - Add multiple family members per client
+- **Card ID Lookup** - Quick search by card number
+- **Site-Specific** - Clients belong to specific sites
+
+### 2. Family Checkout Tracking
+When a client with family checks in/out:
+- **Select Family Members** - Choose who's with them
+- **Count Tracking** - Shows "3 people" in activity log
+- **Named List** - Displays all family member names
+- **Flexible** - Can check in alone or with family
+
+### 3. Visitor Sign-In System
+
+**Visitor Types:**
+- 🔵 Guest
+- 🟣 Vendor
+- 🟠 Contractor
+- 🟢 Outside Employee
+- 🩷 Volunteer
+- ⚪ Other
+
+**Visitor Form:**
+- Name (required)
+- Type (required)
+- Purpose of visit (optional)
+- Who they're visiting (optional)
+
+**Active Visitors:**
+- Real-time display of checked-in visitors
+- Shows check-in time, purpose, and visiting info
+- One-click checkout
+
+### 4. Activity Logging
+- **Real-time Updates** - Instant activity recording
+- **Today's Log** - All activities for current day
+- **Visual Distinction** - Visitors highlighted in indigo
+- **Detailed Info** - Family members, visitor purpose, timestamps
+- **Historical Data** - All activities saved to database
+
+### 5. Fullscreen Kiosk Mode
+- **Tab Navigation** - Switch between clients and visitors
+- **Streamlined UI** - Optimized for touchscreens
+- **Self-Service** - Perfect for reception desk
+- **Exit Button** - Return to normal mode
+
+### 6. Volunteers of America Branding
+- **Logo Support** - Add your VOA logo (PNG/SVG)
+- **Company Name** - Displayed on all pages
+- **Professional** - Branded login and header
+
+## 📁 Project Structure
 
 ```
-client-checkin-system/
-├── public/
-│   └── index.html              # HTML template
+Client-Check-In-Tracking-System/
+├── server/                          # Backend API
+│   ├── server.js                   # Express server
+│   ├── database.js                 # SQLite database setup
+│   ├── package.json                # Backend dependencies
+│   ├── checkin.db                  # SQLite database (auto-created)
+│   └── .gitignore                  # Ignore database file
 ├── src/
 │   ├── components/
-│   │   ├── SiteLogin.jsx       # Login screen component
-│   │   ├── Header.jsx          # Header with site info and logout
-│   │   ├── TabNavigation.jsx   # Tab switcher component
-│   │   ├── AddClientForm.jsx   # Form to add new clients
-│   │   ├── ClientCard.jsx      # Individual client card with check-in/out
-│   │   ├── SignInOutSection.jsx # Main check-in/out interface
-│   │   ├── ActivityItem.jsx    # Single activity log entry
-│   │   └── ActivityLogSection.jsx # Today's activity log
+│   │   ├── SiteLogin.jsx           # Login screen
+│   │   ├── Header.jsx              # Header with VOA branding
+│   │   ├── TabNavigation.jsx       # Tab switcher
+│   │   ├── AddClientForm.jsx       # Add client with card ID & family
+│   │   ├── ClientCard.jsx          # Client card with check-in/out
+│   │   ├── FamilySelectionModal.jsx # Family member selection
+│   │   ├── VisitorSignIn.jsx       # Visitor management
+│   │   ├── SignInOutSection.jsx    # Client check-in interface
+│   │   ├── ActivityItem.jsx        # Activity log entry
+│   │   └── ActivityLogSection.jsx  # Activity log view
+│   ├── services/
+│   │   └── api.js                  # API service layer
 │   ├── config/
-│   │   └── siteConfig.js       # Site passwords configuration
-│   ├── App.js                  # Main application component
-│   ├── index.js                # Application entry point
-│   └── index.css               # Tailwind CSS imports
-├── package.json                # Project dependencies and scripts
-├── tailwind.config.js          # Tailwind CSS configuration
-├── postcss.config.js           # PostCSS configuration
-└── README.md                   # This file
+│   │   └── siteConfig.js           # Site passwords
+│   ├── assets/
+│   │   ├── voa-logo.svg            # VOA logo (placeholder)
+│   │   └── README.md               # Logo instructions
+│   ├── App.js                      # Main application
+│   ├── index.js                    # Entry point
+│   └── index.css                   # Tailwind imports
+├── DATABASE_SETUP.md               # Database documentation
+├── package.json                    # Frontend dependencies
+├── tailwind.config.js              # Tailwind config
+└── README.md                       # This file
 ```
 
-## Dependencies
-
-### Production Dependencies
-
-| Package | Version | Purpose |
-|---------|---------|---------|
-| react | ^18.2.0 | Core React library |
-| react-dom | ^18.2.0 | React DOM rendering |
-| react-scripts | 5.0.1 | Create React App scripts |
-| lucide-react | ^0.263.1 | Icon library |
-
-### Development Dependencies
-
-| Package | Version | Purpose |
-|---------|---------|---------|
-| tailwindcss | ^3.3.0 | Utility-first CSS framework |
-| autoprefixer | ^10.4.14 | PostCSS plugin for vendor prefixes |
-| postcss | ^8.4.24 | CSS transformation tool |
-
-### Installing Dependencies Manually
-
-If you need to reinstall dependencies:
-
-```bash
-# Remove existing node_modules and lock file
-rm -rf node_modules package-lock.json
-
-# Install production dependencies
-npm install react react-dom react-scripts lucide-react
-
-# Install development dependencies
-npm install -D tailwindcss autoprefixer postcss
-
-# Initialize Tailwind (if needed)
-npx tailwindcss init
-```
-
-## Configuration
+## ⚙️ Configuration
 
 ### Site Passwords
 
-Edit `src/config/siteConfig.js` to change site passwords:
+Edit `src/config/siteConfig.js`:
 
 ```javascript
 export const SITE_CONFIG = {
@@ -153,228 +332,387 @@ export const SITE_CONFIG = {
 };
 ```
 
-**Security Note:** For production use, implement proper authentication with encrypted passwords stored in a secure database.
+### Add VOA Logo
 
-### Adding New Sites
+1. Place your logo as `src/assets/voa-logo.png`
+2. Recommended: PNG with transparent background, 200x200px
+3. Logo appears automatically on header and login
 
-1. Open `src/config/siteConfig.js`
-2. Add a new entry to `SITE_CONFIG`:
-   ```javascript
-   'New Site Name': { password: 'yourpassword' }
-   ```
+### API Configuration
 
-### Tailwind CSS Configuration
+Default: `http://localhost:3001/api`
 
-Customize styling in `tailwind.config.js`:
-
-```javascript
-module.exports = {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
-  theme: {
-    extend: {
-      // Add custom colors, fonts, etc.
-    },
-  },
-  plugins: [],
-}
+To change:
+```bash
+REACT_APP_API_URL=http://your-server:3001/api npm start
 ```
 
-## Usage
+## 🔌 API Documentation
 
-### Default Login Credentials
+### Base URL
+```
+http://localhost:3001/api
+```
 
-| Site | Password |
-|------|----------|
-| Main Campus | `main123` |
-| Eastside Center | `east456` |
-| Westside Hub | `west789` |
-| Downtown Facility | `down101` |
+### Client Endpoints
 
-### How to Use the Application
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/clients/:site` | Get all clients for site |
+| GET | `/clients/id/:id` | Get client by ID |
+| GET | `/clients/card/:cardId` | Get client by card ID |
+| POST | `/clients` | Create new client |
+| PUT | `/clients/:id` | Update client |
+| DELETE | `/clients/:id` | Delete client |
 
-1. **Login:**
-   - Select your program site from the dropdown
-   - Enter the site password
-   - Click "Access Site"
+### Visitor Endpoints
 
-2. **Check In/Out:**
-   - Find the client's name card
-   - Click "Check In" or "Check Out"
-   - Enter the client's apartment number to verify
-   - Click "Verify" or press Enter
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/visitors/:site/active` | Get active visitors |
+| POST | `/visitors` | Check in visitor |
+| PUT | `/visitors/:id/checkout` | Check out visitor |
 
-3. **Add New Client:**
-   - Click "Add Client" button
-   - Enter client name and apartment number
-   - Click "Save Client"
+### Activity Endpoints
 
-4. **View Activity Log:**
-   - Click "Today's Activity" tab
-   - See all check-ins and check-outs for the current day
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/activities/:site/today` | Today's activities |
+| POST | `/activities` | Create activity |
+| GET | `/activities?site=&date=` | Query activities |
 
-5. **Fullscreen Mode:**
-   - Click "Fullscreen" button for kiosk mode
-   - Great for self-service stations
-   - Click "Exit Fullscreen" to return to normal view
+### Example Requests
 
-6. **Logout:**
-   - Click "Logout" to return to login screen
-   - Required to switch sites
+**Get Clients:**
+```bash
+curl http://localhost:3001/api/clients/Main%20Campus
+```
 
-## Building for Production
+**Search by Card ID:**
+```bash
+curl http://localhost:3001/api/clients/card/CARD001
+```
 
-### Create Production Build
+**Create Client:**
+```bash
+curl -X POST http://localhost:3001/api/clients \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Jane Doe",
+    "apartment": "404",
+    "site": "Main Campus",
+    "cardId": "CARD123",
+    "familyMembers": ["John Doe", "Baby Doe"]
+  }'
+```
+
+## 📖 Usage Guide
+
+### Client Check-In/Out
+
+1. **Login** to your site
+2. **Find client card** on main page
+3. **Click "Check In"** or "Check Out"
+4. **Select family members** (if applicable)
+5. **Confirm** - Activity logs automatically
+
+### Add New Client
+
+1. **Click "Add Client"** button
+2. **Enter:**
+   - Full name (required)
+   - Apartment number (required)
+   - Card ID (optional)
+3. **Add family members:**
+   - Click "Add Member"
+   - Enter names
+   - Remove with trash icon
+4. **Click "Save Client"**
+
+### Visitor Sign-In
+
+1. **Click "Visitor Sign In/Out"** tab
+2. **Click "New Visitor Check-In"**
+3. **Fill form:**
+   - Name (required)
+   - Type: Guest, Vendor, etc.
+   - Purpose (optional)
+   - Visiting (optional)
+4. **Click "Check In Visitor"**
+
+### Visitor Check-Out
+
+1. **Go to "Visitor Sign In/Out"** tab
+2. **Find visitor** in active list
+3. **Click "Check Out"** button
+
+### View Activity Log
+
+1. **Click "Today's Activity"** tab
+2. **See all check-ins/outs:**
+   - Green = Check-in
+   - Red = Check-out
+   - Indigo background = Visitor
+3. **Family members** listed below main name
+4. **Visitor details** show purpose and visiting
+
+### Fullscreen Mode
+
+1. **Click "Fullscreen"** in header
+2. **Use tabs** to switch between clients/visitors
+3. **Click "Exit Fullscreen"** to return
+
+## 🏗️ Building for Production
+
+### Build Frontend
 
 ```bash
 npm run build
 ```
 
-This creates an optimized production build in the `build/` folder.
+Creates optimized build in `build/` folder.
 
-### Serve Production Build Locally
+### Deploy
 
+**Option 1: Same Server**
 ```bash
-# Install serve globally
-npm install -g serve
+# Build frontend
+npm run build
 
-# Serve the build folder
+# Start backend (serves API)
+cd server && npm start
+
+# Serve frontend
 serve -s build
 ```
 
-The production build will be available at `http://localhost:3000` (or another port if 3000 is in use).
-
-### Deploy to a Web Server
-
-After running `npm run build`, upload the contents of the `build/` folder to your web server or hosting service (Netlify, Vercel, AWS, etc.).
-
-## Available Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm start` | Start development server |
-| `npm run build` | Build for production |
-| `npm test` | Run tests |
-| `npm run eject` | Eject from Create React App (⚠️ irreversible) |
-
-## Troubleshooting
-
-### Tailwind Styles Not Loading
-
-1. Ensure `postcss.config.js` exists in the root directory:
-   ```javascript
-   module.exports = {
-     plugins: {
-       tailwindcss: {},
-       autoprefixer: {},
-     },
-   }
-   ```
-
-2. Verify `src/index.css` contains:
-   ```css
-   @tailwind base;
-   @tailwind components;
-   @tailwind utilities;
-   ```
-
-3. Make sure `src/index.js` imports `index.css`:
-   ```javascript
-   import './index.css';
-   ```
-
-4. Restart the development server:
-   ```bash
-   npm start
-   ```
-
-### Port 3000 Already in Use
-
+**Option 2: Separate Servers**
 ```bash
-# On macOS/Linux
-PORT=3001 npm start
+# Backend on server1:3001
+cd server && npm start
 
-# On Windows (Command Prompt)
-set PORT=3001 && npm start
-
-# On Windows (PowerShell)
-$env:PORT=3001; npm start
+# Frontend with API URL
+REACT_APP_API_URL=http://server1:3001/api npm run build
+# Deploy build/ folder to web server
 ```
 
-### Dependencies Installation Failed
+### Production Checklist
+
+- [ ] Change all site passwords
+- [ ] Set up database backups
+- [ ] Configure HTTPS
+- [ ] Set environment variables
+- [ ] Test all features
+- [ ] Add monitoring/logging
+- [ ] Implement proper authentication
+
+## 🔧 Troubleshooting
+
+### "Failed to load data"
+
+**Cause:** Backend not running or port issue
+
+**Solution:**
+```bash
+# Check if backend is running
+curl http://localhost:3001/api/health
+
+# Start backend if not running
+cd server && npm start
+```
+
+### Port Already in Use
+
+**Backend (3001):**
+```bash
+PORT=3002 npm start
+# Update frontend: REACT_APP_API_URL=http://localhost:3002/api
+```
+
+**Frontend (3000):**
+```bash
+PORT=3001 npm start
+```
+
+### Database Locked
 
 ```bash
-# Clear npm cache
-npm cache clean --force
+# Close all apps using database
+# Delete lock files
+cd server
+rm checkin.db-journal
+npm start
+```
 
-# Delete node_modules and package-lock.json
-rm -rf node_modules package-lock.json
+### Reset Everything
+
+```bash
+# Delete node_modules
+rm -rf node_modules server/node_modules
+
+# Delete database
+rm server/checkin.db
 
 # Reinstall
 npm install
+cd server && npm install && cd ..
+
+# Restart both servers
+cd server && npm start &
+npm start
 ```
 
-### "Module not found" Errors
+### Styles Not Loading
 
 ```bash
-# Reinstall specific package
-npm install <package-name>
+# Verify Tailwind setup
+cat postcss.config.js
+cat src/index.css
 
-# Example:
-npm install lucide-react
+# Restart dev server
+npm start
 ```
 
-## Browser Support
+## 🛡️ Security
 
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
+### Current Security
 
-## Data Persistence
+- ✅ Site-based password authentication
+- ✅ Local database (not exposed to internet)
+- ✅ CORS configured for localhost
+- ✅ Input validation on forms
 
-**Important:** This application stores data in memory only. All client data and activity logs will be lost when:
-- The page is refreshed
-- The browser is closed
-- The server is restarted
+### Production Security Requirements
 
-For production use, integrate a database solution (Firebase, MongoDB, PostgreSQL, etc.) to persist data.
+⚠️ **Before deploying to production:**
 
-## Security Considerations
+1. **Implement proper authentication**
+   - Hash and salt passwords
+   - Use JWT or sessions
+   - Add user roles (admin, staff, etc.)
 
-⚠️ **This is a demo application.** For production use:
+2. **Secure the database**
+   - Encrypt sensitive data
+   - Regular backups
+   - Access controls
 
-1. Implement proper backend authentication
-2. Use HTTPS for all connections
-3. Store passwords securely (hashed and salted)
-4. Add role-based access control
-5. Implement data encryption
-6. Add audit logging
-7. Set up regular backups
-8. Follow GDPR/privacy regulations
+3. **Use HTTPS**
+   - SSL/TLS certificates
+   - Secure all API calls
 
-## Future Enhancements
+4. **Add audit logging**
+   - Who did what when
+   - Failed login attempts
+   - Data modifications
 
-- [ ] Database integration for data persistence
-- [ ] Export activity logs to CSV/PDF
-- [ ] Email/SMS notifications
-- [ ] Multi-language support
-- [ ] Advanced reporting and analytics
-- [ ] Mobile app (React Native)
-- [ ] Barcode/QR code scanning
-- [ ] Biometric authentication
+5. **Follow compliance**
+   - GDPR for EU data
+   - HIPAA if health data
+   - Local privacy laws
 
-## Support
+6. **Implement rate limiting**
+   - Prevent brute force
+   - API throttling
 
-For issues, questions, or contributions, please contact your system administrator or create an issue in the project repository.
+7. **Data validation**
+   - Sanitize all inputs
+   - Prevent SQL injection
+   - XSS protection
 
-## License
+## 📊 Dependencies
+
+### Frontend
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| react | ^18.2.0 | UI framework |
+| react-dom | ^18.2.0 | DOM rendering |
+| react-scripts | 5.0.1 | Build tools |
+| lucide-react | ^0.263.1 | Icons |
+| tailwindcss | ^3.4.18 | Styling |
+
+### Backend
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| express | ^4.18.2 | Web server |
+| better-sqlite3 | ^9.2.2 | SQLite database |
+| cors | ^2.8.5 | Cross-origin requests |
+| body-parser | ^1.20.2 | Parse request bodies |
+
+## 📝 Available Scripts
+
+### Frontend
+
+| Command | Description |
+|---------|-------------|
+| `npm start` | Start dev server (port 3000) |
+| `npm run build` | Build for production |
+| `npm test` | Run tests |
+| `npm run eject` | Eject from CRA (⚠️ irreversible) |
+
+### Backend
+
+| Command | Description |
+|---------|-------------|
+| `npm start` | Start API server (port 3001) |
+| `npm run dev` | Start with auto-reload (nodemon) |
+
+## 🎨 Customization
+
+### Change Theme Colors
+
+Edit `tailwind.config.js`:
+
+```javascript
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        'voa-blue': '#4955a4',
+        'voa-green': '#00a651',
+      }
+    }
+  }
+}
+```
+
+### Add Custom Fields
+
+1. Update database schema in `server/database.js`
+2. Add fields to frontend forms
+3. Update API handlers in `server/server.js`
+4. Update frontend API calls in `src/services/api.js`
+
+## 🤝 Contributing
+
+To contribute to this project:
+
+1. Create a feature branch
+2. Make your changes
+3. Test thoroughly
+4. Submit a pull request
+
+## 📄 License
 
 This project is licensed under the MIT License.
 
+## 💡 Support
+
+For issues, questions, or feature requests:
+
+- Check `DATABASE_SETUP.md` for database help
+- Review this README
+- Contact your system administrator
+- Create an issue in the repository
+
+## 🙏 Acknowledgments
+
+Developed for **Volunteers of America** to streamline client and visitor management across program sites.
+
 ---
 
-**Version:** 1.0.0  
+**Version:** 2.0.0
 **Last Updated:** 2025
-**Developed for:** Volunteers of America  
+**Developed for:** Volunteers of America
+**Tech Stack:** React + Node.js + Express + SQLite + Tailwind CSS
