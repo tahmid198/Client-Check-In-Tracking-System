@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SiteLogin from './components/SiteLogin';
 import Header from './components/Header';
 import TabNavigation from './components/TabNavigation';
@@ -6,31 +6,60 @@ import SignInOutSection from './components/SignInOutSection';
 import ActivityLogSection from './components/ActivityLogSection';
 import FamilySelectionModal from './components/FamilySelectionModal';
 import VisitorSignIn from './components/VisitorSignIn';
+import { clientAPI, visitorAPI, activityAPI } from './services/api';
 
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentSite, setCurrentSite] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  
-  const [clients, setClients] = useState([
-    { id: 1, name: 'John Smith', apartment: '101', site: 'Main Campus', familyMembers: ['Jane Smith', 'Jimmy Smith'] },
-    { id: 2, name: 'Sarah Johnson', apartment: '205', site: 'Main Campus', familyMembers: [] },
-    { id: 3, name: 'Michael Brown', apartment: '302', site: 'Eastside Center', familyMembers: ['Emily Brown', 'Lucas Brown', 'Sophia Brown'] },
-  ]);
-  
+
+  const [clients, setClients] = useState([]);
   const [activities, setActivities] = useState([]);
   const [showAddClient, setShowAddClient] = useState(false);
-  const [newClient, setNewClient] = useState({ name: '', apartment: '', familyMembers: [] });
+  const [newClient, setNewClient] = useState({ name: '', apartment: '', cardId: '', familyMembers: [] });
   const [activeTab, setActiveTab] = useState('signin');
   const [showFamilyModal, setShowFamilyModal] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
   const [visitors, setVisitors] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleLogin = (site) => {
+  // Load data when site is selected
+  useEffect(() => {
+    if (currentSite) {
+      loadSiteData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSite]);
+
+  const loadSiteData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Load clients, visitors, and activities for the current site
+      const [clientsData, visitorsData, activitiesData] = await Promise.all([
+        clientAPI.getClientsBySite(currentSite),
+        visitorAPI.getActiveVisitors(currentSite),
+        activityAPI.getTodayActivities(currentSite)
+      ]);
+
+      setClients(clientsData);
+      setVisitors(visitorsData);
+      setActivities(activitiesData);
+    } catch (err) {
+      console.error('Error loading site data:', err);
+      setError('Failed to load data. Make sure the server is running.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogin = async (site) => {
     setIsAuthenticated(true);
     setCurrentSite(site);
-    setNewClient({ name: '', apartment: '', familyMembers: [] });
+    setNewClient({ name: '', apartment: '', cardId: '', familyMembers: [] });
   };
 
   const handleLogout = () => {
@@ -67,38 +96,52 @@ function App() {
     }
   };
 
-  const confirmSignIn = (client, selectedFamilyMembers) => {
-    const activity = {
-      id: Date.now(),
-      clientId: client.id,
-      clientName: client.name,
-      apartment: client.apartment,
-      site: client.site,
-      action: 'IN',
-      timestamp: new Date().toISOString(),
-      familyMembers: selectedFamilyMembers,
-      totalPeople: selectedFamilyMembers.length + 1
-    };
-    setActivities([activity, ...activities]);
-    setShowFamilyModal(false);
-    setPendingAction(null);
+  const confirmSignIn = async (client, selectedFamilyMembers) => {
+    try {
+      const activity = {
+        clientId: client.id,
+        clientName: client.name,
+        apartment: client.apartment,
+        site: client.site,
+        action: 'IN',
+        timestamp: new Date().toISOString(),
+        familyMembers: selectedFamilyMembers,
+        totalPeople: selectedFamilyMembers.length + 1,
+        isVisitor: false
+      };
+
+      const savedActivity = await activityAPI.createActivity(activity);
+      setActivities([savedActivity, ...activities]);
+      setShowFamilyModal(false);
+      setPendingAction(null);
+    } catch (err) {
+      console.error('Error creating check-in activity:', err);
+      setError('Failed to record check-in');
+    }
   };
 
-  const confirmSignOut = (client, selectedFamilyMembers) => {
-    const activity = {
-      id: Date.now(),
-      clientId: client.id,
-      clientName: client.name,
-      apartment: client.apartment,
-      site: client.site,
-      action: 'OUT',
-      timestamp: new Date().toISOString(),
-      familyMembers: selectedFamilyMembers,
-      totalPeople: selectedFamilyMembers.length + 1
-    };
-    setActivities([activity, ...activities]);
-    setShowFamilyModal(false);
-    setPendingAction(null);
+  const confirmSignOut = async (client, selectedFamilyMembers) => {
+    try {
+      const activity = {
+        clientId: client.id,
+        clientName: client.name,
+        apartment: client.apartment,
+        site: client.site,
+        action: 'OUT',
+        timestamp: new Date().toISOString(),
+        familyMembers: selectedFamilyMembers,
+        totalPeople: selectedFamilyMembers.length + 1,
+        isVisitor: false
+      };
+
+      const savedActivity = await activityAPI.createActivity(activity);
+      setActivities([savedActivity, ...activities]);
+      setShowFamilyModal(false);
+      setPendingAction(null);
+    } catch (err) {
+      console.error('Error creating check-out activity:', err);
+      setError('Failed to record check-out');
+    }
   };
 
   const handleFamilyConfirm = (selectedMembers) => {
@@ -116,64 +159,89 @@ function App() {
     setPendingAction(null);
   };
 
-  const handleAddClient = () => {
+  const handleAddClient = async () => {
     if (newClient.name && newClient.apartment) {
-      // Filter out empty family member names
-      const validFamilyMembers = (newClient.familyMembers || []).filter(member => member.trim() !== '');
+      try {
+        // Filter out empty family member names
+        const validFamilyMembers = (newClient.familyMembers || []).filter(member => member.trim() !== '');
 
-      const client = {
-        id: Date.now(),
-        name: newClient.name,
-        apartment: newClient.apartment,
-        site: currentSite,
-        familyMembers: validFamilyMembers
-      };
-      setClients([...clients, client]);
-      setNewClient({ name: '', apartment: '', familyMembers: [] });
-      setShowAddClient(false);
+        const clientData = {
+          name: newClient.name,
+          apartment: newClient.apartment,
+          site: currentSite,
+          cardId: newClient.cardId || null,
+          familyMembers: validFamilyMembers
+        };
+
+        const savedClient = await clientAPI.createClient(clientData);
+        setClients([...clients, savedClient]);
+        setNewClient({ name: '', apartment: '', cardId: '', familyMembers: [] });
+        setShowAddClient(false);
+      } catch (err) {
+        console.error('Error adding client:', err);
+        setError('Failed to add client');
+      }
     }
   };
 
-  const handleVisitorSignIn = (visitorData) => {
-    const visitor = {
-      id: Date.now(),
-      ...visitorData,
-      site: currentSite,
-      checkInTime: new Date().toISOString()
-    };
-    setVisitors([...visitors, visitor]);
+  const handleVisitorSignIn = async (visitorData) => {
+    try {
+      const checkInTime = new Date().toISOString();
 
-    const activity = {
-      id: Date.now() + 1,
-      visitorId: visitor.id,
-      clientName: visitor.name,
-      site: visitor.site,
-      action: 'IN',
-      timestamp: visitor.checkInTime,
-      isVisitor: true,
-      visitorType: visitor.type,
-      purpose: visitor.purpose,
-      visiting: visitor.visiting
-    };
-    setActivities([activity, ...activities]);
+      const visitorPayload = {
+        ...visitorData,
+        site: currentSite,
+        checkInTime
+      };
+
+      const savedVisitor = await visitorAPI.checkInVisitor(visitorPayload);
+      setVisitors([...visitors, savedVisitor]);
+
+      const activity = {
+        visitorId: savedVisitor.id,
+        clientName: savedVisitor.name,
+        site: savedVisitor.site,
+        action: 'IN',
+        timestamp: checkInTime,
+        isVisitor: true,
+        visitorType: savedVisitor.type,
+        purpose: savedVisitor.purpose,
+        visiting: savedVisitor.visiting
+      };
+
+      const savedActivity = await activityAPI.createActivity(activity);
+      setActivities([savedActivity, ...activities]);
+    } catch (err) {
+      console.error('Error checking in visitor:', err);
+      setError('Failed to check in visitor');
+    }
   };
 
-  const handleVisitorSignOut = (visitor) => {
-    setVisitors(visitors.filter(v => v.id !== visitor.id));
+  const handleVisitorSignOut = async (visitor) => {
+    try {
+      const checkOutTime = new Date().toISOString();
 
-    const activity = {
-      id: Date.now(),
-      visitorId: visitor.id,
-      clientName: visitor.name,
-      site: visitor.site,
-      action: 'OUT',
-      timestamp: new Date().toISOString(),
-      isVisitor: true,
-      visitorType: visitor.type,
-      purpose: visitor.purpose,
-      visiting: visitor.visiting
-    };
-    setActivities([activity, ...activities]);
+      await visitorAPI.checkOutVisitor(visitor.id, checkOutTime);
+      setVisitors(visitors.filter(v => v.id !== visitor.id));
+
+      const activity = {
+        visitorId: visitor.id,
+        clientName: visitor.name,
+        site: visitor.site,
+        action: 'OUT',
+        timestamp: checkOutTime,
+        isVisitor: true,
+        visitorType: visitor.type,
+        purpose: visitor.purpose,
+        visiting: visitor.visiting
+      };
+
+      const savedActivity = await activityAPI.createActivity(activity);
+      setActivities([savedActivity, ...activities]);
+    } catch (err) {
+      console.error('Error checking out visitor:', err);
+      setError('Failed to check out visitor');
+    }
   };
 
   const formatTime = (timestamp) => {
