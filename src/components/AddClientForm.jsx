@@ -23,7 +23,7 @@ const AddClientForm = ({ newClient, setNewClient, currentSite, onSave, onCancel 
   return (
     <div className="mb-6 p-4 bg-gray-50 rounded-lg">
       <h3 className="font-semibold text-gray-700 mb-3">New Client</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <input
           type="text"
           placeholder="Full Name"
@@ -36,6 +36,13 @@ const AddClientForm = ({ newClient, setNewClient, currentSite, onSave, onCancel 
           placeholder="Apartment #"
           value={newClient.apartment}
           onChange={(e) => setNewClient({...newClient, apartment: e.target.value})}
+          className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+        />
+        <input
+          type="text"
+          placeholder="Card ID (Optional)"
+          value={newClient.cardId || ''}
+          onChange={(e) => setNewClient({...newClient, cardId: e.target.value})}
           className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
         />
       </div>
