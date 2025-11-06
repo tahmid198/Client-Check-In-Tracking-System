@@ -40,7 +40,10 @@ const Header = ({ currentSite, onLogout, isFullscreen, onToggleFullscreen, onOpe
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right">
-            <p className="text-sm text-gray-500">Current Time</p>
+            <p className="text-sm text-gray-500">Current Date & Time</p>
+            <p className="text-base font-semibold text-gray-700">
+              {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+            </p>
             <p className="text-lg font-semibold text-gray-700">
               {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
             </p>
