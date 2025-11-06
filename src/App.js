@@ -6,8 +6,7 @@ import SignInOutSection from './components/SignInOutSection';
 import ActivityLogSection from './components/ActivityLogSection';
 import FamilySelectionModal from './components/FamilySelectionModal';
 import VisitorSignIn from './components/VisitorSignIn';
-import EditClientModal from './components/EditClientModal';
-import DeleteConfirmationModal from './components/DeleteConfirmationModal';
+import UserManagement from './components/UserManagement';
 import { clientAPI, visitorAPI, activityAPI } from './services/api';
 
 
@@ -26,10 +25,6 @@ function App() {
   const [visitors, setVisitors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [clientToEdit, setClientToEdit] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [clientToDelete, setClientToDelete] = useState(null);
 
   // Load data when site is selected
   useEffect(() => {
@@ -190,48 +185,6 @@ function App() {
     }
   };
 
-  const handleEditClient = (client) => {
-    setClientToEdit(client);
-    setShowEditModal(true);
-  };
-
-  const handleSaveEdit = async (editedData) => {
-    try {
-      const updatedData = {
-        name: editedData.name,
-        apartment: editedData.apartment,
-        site: currentSite,
-        cardId: editedData.cardId || null,
-        familyMembers: editedData.familyMembers
-      };
-
-      const updatedClient = await clientAPI.updateClient(clientToEdit.id, updatedData);
-      setClients(clients.map(c => c.id === clientToEdit.id ? updatedClient : c));
-      setShowEditModal(false);
-      setClientToEdit(null);
-    } catch (err) {
-      console.error('Error updating client:', err);
-      setError('Failed to update client');
-    }
-  };
-
-  const handleDeleteClient = (client) => {
-    setClientToDelete(client);
-    setShowDeleteModal(true);
-  };
-
-  const confirmDeleteClient = async (clientId) => {
-    try {
-      await clientAPI.deleteClient(clientId);
-      setClients(clients.filter(c => c.id !== clientId));
-      setShowDeleteModal(false);
-      setClientToDelete(null);
-    } catch (err) {
-      console.error('Error deleting client:', err);
-      setError('Failed to delete client');
-    }
-  };
-
   const handleVisitorSignIn = async (visitorData) => {
     try {
       const checkInTime = new Date().toISOString();
@@ -371,8 +324,6 @@ function App() {
               onAddClient={handleAddClient}
               onSignIn={handleSignIn}
               onSignOut={handleSignOut}
-              onEdit={handleEditClient}
-              onDelete={handleDeleteClient}
               getClientStatus={getClientStatus}
               isFullscreen={isFullscreen}
               onExitFullscreen={handleExitFullscreen}
@@ -394,28 +345,6 @@ function App() {
               action={pendingAction.action}
               onConfirm={handleFamilyConfirm}
               onCancel={handleFamilyCancel}
-            />
-          )}
-
-          {showEditModal && clientToEdit && (
-            <EditClientModal
-              client={clientToEdit}
-              onSave={handleSaveEdit}
-              onCancel={() => {
-                setShowEditModal(false);
-                setClientToEdit(null);
-              }}
-            />
-          )}
-
-          {showDeleteModal && clientToDelete && (
-            <DeleteConfirmationModal
-              client={clientToDelete}
-              onConfirm={() => confirmDeleteClient(clientToDelete.id)}
-              onCancel={() => {
-                setShowDeleteModal(false);
-                setClientToDelete(null);
-              }}
             />
           )}
         </div>
@@ -448,8 +377,6 @@ function App() {
             onAddClient={handleAddClient}
             onSignIn={handleSignIn}
             onSignOut={handleSignOut}
-            onEdit={handleEditClient}
-            onDelete={handleDeleteClient}
             getClientStatus={getClientStatus}
             isFullscreen={isFullscreen}
             onExitFullscreen={handleExitFullscreen}
@@ -473,34 +400,16 @@ function App() {
           />
         )}
 
+        {activeTab === 'management' && (
+          <UserManagement currentSite={currentSite} />
+        )}
+
         {showFamilyModal && pendingAction && (
           <FamilySelectionModal
             client={pendingAction.client}
             action={pendingAction.action}
             onConfirm={handleFamilyConfirm}
             onCancel={handleFamilyCancel}
-          />
-        )}
-
-        {showEditModal && clientToEdit && (
-          <EditClientModal
-            client={clientToEdit}
-            onSave={handleSaveEdit}
-            onCancel={() => {
-              setShowEditModal(false);
-              setClientToEdit(null);
-            }}
-          />
-        )}
-
-        {showDeleteModal && clientToDelete && (
-          <DeleteConfirmationModal
-            client={clientToDelete}
-            onConfirm={() => confirmDeleteClient(clientToDelete.id)}
-            onCancel={() => {
-              setShowDeleteModal(false);
-              setClientToDelete(null);
-            }}
           />
         )}
       </div>

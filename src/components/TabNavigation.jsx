@@ -33,6 +33,16 @@ const TabNavigation = ({ activeTab, setActiveTab }) => {
       >
         Today's Activity
       </button>
+      <button
+        onClick={() => setActiveTab('management')}
+        className={`flex-1 py-3 px-4 rounded-lg font-medium transition ${
+          activeTab === 'management'
+            ? 'bg-indigo-600 text-white'
+            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+        }`}
+      >
+        User Management
+      </button>
     </div>
   );
 };

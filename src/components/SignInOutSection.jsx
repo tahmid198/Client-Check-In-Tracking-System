@@ -13,8 +13,6 @@ const SignInOutSection = ({
   onAddClient,
   onSignIn,
   onSignOut,
-  onEdit,
-  onDelete,
   getClientStatus,
   isFullscreen,
   onExitFullscreen
@@ -60,8 +58,6 @@ const SignInOutSection = ({
             client={client}
             onSignIn={onSignIn}
             onSignOut={onSignOut}
-            onEdit={onEdit}
-            onDelete={onDelete}
             isSignedIn={getClientStatus(client.id)}
           />
         ))}
