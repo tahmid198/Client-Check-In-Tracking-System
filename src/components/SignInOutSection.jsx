@@ -3,10 +3,10 @@ import { UserPlus, Users, Minimize } from 'lucide-react';
 import AddClientForm from './AddClientForm';
 import ClientCard from './ClientCard';
 
-const SignInOutSection = ({ 
+const SignInOutSection = ({
   currentSite,
-  filteredClients, 
-  showAddClient, 
+  filteredClients,
+  showAddClient,
   setShowAddClient,
   newClient,
   setNewClient,
