@@ -24,8 +24,8 @@ const ClientCard = ({ client, onSignIn, onSignOut, isSignedIn }) => {
           <p className="text-xs text-gray-500">Card: {client.cardId}</p>
         )}
         {client.familyMembers && client.familyMembers.length > 0 && (
-          <p className="text-xs text-blue-600 mt-1">
-            👨‍👩‍👧‍👦 {client.familyMembers.length} family member{client.familyMembers.length !== 1 ? 's' : ''}
+          <p className="text-xs text-gray-800 mt-1">
+            {client.familyMembers.length} family member{client.familyMembers.length !== 1 ? 's' : ''}
           </p>
         )}
       </div>

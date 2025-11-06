@@ -25,6 +25,7 @@ function App() {
   const [visitors, setVisitors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   // Load data when site is selected
   useEffect(() => {
@@ -77,6 +78,14 @@ function App() {
 
   const handleExitFullscreen = () => {
     setIsFullscreen(false);
+  };
+
+  const handleOpenSettings = () => {
+    setShowSettings(true);
+  };
+
+  const handleCloseSettings = () => {
+    setShowSettings(false);
   };
 
   const handleSignIn = (client) => {
@@ -360,6 +369,7 @@ function App() {
           onLogout={handleLogout}
           isFullscreen={isFullscreen}
           onToggleFullscreen={handleToggleFullscreen}
+          onOpenSettings={handleOpenSettings}
         />
 
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -400,10 +410,6 @@ function App() {
           />
         )}
 
-        {activeTab === 'management' && (
-          <UserManagement currentSite={currentSite} />
-        )}
-
         {showFamilyModal && pendingAction && (
           <FamilySelectionModal
             client={pendingAction.client}
@@ -411,6 +417,25 @@ function App() {
             onConfirm={handleFamilyConfirm}
             onCancel={handleFamilyCancel}
           />
+        )}
+
+        {showSettings && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
+                <h2 className="text-xl font-bold text-gray-800">User Management</h2>
+                <button
+                  onClick={handleCloseSettings}
+                  className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="p-4">
+                <UserManagement currentSite={currentSite} />
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

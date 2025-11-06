@@ -1,7 +1,7 @@
 import React from 'react';
-import { Users, Lock, Maximize } from 'lucide-react';
+import { Users, Lock, Maximize, Settings } from 'lucide-react';
 
-const Header = ({ currentSite, onLogout, isFullscreen, onToggleFullscreen }) => {
+const Header = ({ currentSite, onLogout, isFullscreen, onToggleFullscreen, onOpenSettings }) => {
   // Try to load logo if it exists, otherwise use default icon
   let logo = null;
   try {
@@ -46,13 +46,22 @@ const Header = ({ currentSite, onLogout, isFullscreen, onToggleFullscreen }) => 
             </p>
           </div>
           {!isFullscreen && (
-            <button
-              onClick={onToggleFullscreen}
-              className="flex items-center gap-2 bg-indigo-100 text-indigo-700 px-4 py-2 rounded-lg hover:bg-indigo-200 transition"
-            >
-              <Maximize className="w-4 h-4" />
-              Fullscreen
-            </button>
+            <>
+              <button
+                onClick={onToggleFullscreen}
+                className="flex items-center gap-2 bg-indigo-100 text-indigo-700 px-4 py-2 rounded-lg hover:bg-indigo-200 transition"
+              >
+                <Maximize className="w-4 h-4" />
+                Fullscreen
+              </button>
+              <button
+                onClick={onOpenSettings}
+                className="flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-200 transition"
+                title="User Management"
+              >
+                <Settings className="w-5 h-5" />
+              </button>
+            </>
           )}
           <button
             onClick={onLogout}

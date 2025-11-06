@@ -89,11 +89,7 @@ const UserManagement = ({ currentSite }) => {
   );
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">User Management - {currentSite}</h2>
-      </div>
-
+    <div>
       {/* Tab Navigation */}
       <div className="flex gap-4 mb-6 border-b">
         <button
