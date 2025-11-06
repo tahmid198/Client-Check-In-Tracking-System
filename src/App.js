@@ -40,11 +40,11 @@ function App() {
       setLoading(true);
       setError(null);
 
-      // Load clients, visitors, and activities for the current site
+      // Load clients, visitors, and all activities for the current site
       const [clientsData, visitorsData, activitiesData] = await Promise.all([
         clientAPI.getClientsBySite(currentSite),
         visitorAPI.getActiveVisitors(currentSite),
-        activityAPI.getTodayActivities(currentSite)
+        activityAPI.getAllActivities({ site: currentSite })
       ]);
 
       setClients(clientsData);
@@ -271,11 +271,7 @@ function App() {
 
   const filteredClients = clients.filter(c => c.site === currentSite);
   const activeVisitors = visitors.filter(v => v.site === currentSite);
-  const todayActivities = activities.filter(a => {
-    const activityDate = new Date(a.timestamp).toDateString();
-    const today = new Date().toDateString();
-    return activityDate === today && a.site === currentSite;
-  });
+  const siteActivities = activities.filter(a => a.site === currentSite);
 
   if (!isAuthenticated) {
     return <SiteLogin onLogin={handleLogin} />;
@@ -405,7 +401,7 @@ function App() {
         {activeTab === 'log' && (
           <ActivityLogSection
             currentSite={currentSite}
-            todayActivities={todayActivities}
+            activities={siteActivities}
             formatTime={formatTime}
           />
         )}

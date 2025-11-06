@@ -31,7 +31,7 @@ const TabNavigation = ({ activeTab, setActiveTab }) => {
             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
         }`}
       >
-        Today's Activity
+        Activity Log
       </button>
     </div>
   );
